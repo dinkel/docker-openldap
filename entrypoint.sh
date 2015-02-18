@@ -22,6 +22,8 @@ if [[ ! -f /etc/ldap/docker-configured ]]; then
         slapd slapd/no_configuration boolean false
         slapd slapd/password1 password $SLAPD_PASSWORD
         slapd slapd/password2 password $SLAPD_PASSWORD
+        slapd slapd/internal/adminpw string $SLAPD_PASSWORD
+        slapd slapd/internal/generated_adminpw password $SLAPD_PASSWORD
         slapd shared/organization string $SLAPD_ORGANIZATION
         slapd slapd/domain string $SLAPD_DOMAIN
         slapd slapd/backend select hdb
@@ -30,7 +32,7 @@ if [[ ! -f /etc/ldap/docker-configured ]]; then
         slapd slapd/move_old_database boolean true
 EOF
 
-    dpkg-reconfigure -fnoninteractive slapd >/dev/null 2>&1
+    dpkg-reconfigure -f noninteractive slapd >/dev/null 2>&1
 
     dc_string=""
 
@@ -43,6 +45,15 @@ EOF
     base_string="BASE ${dc_string:1}"
 
     sed -i "s/^#BASE.*/${base_string}/g" /etc/ldap/ldap.conf
+
+    if [[ -n  "$SLAPD_CONFIG_PASSWORD" ]]; then
+        password_hash=`slappasswd -s "${SLAPD_CONFIG_PASSWORD}"`
+
+        slapcat -n0 -F /etc/ldap/slapd.d -l /tmp/config.ldif
+        sed -i "s/\(olcRootDN: cn=admin,cn=config\)/\1\nolcRootPW: ${password_hash}/g" /tmp/config.ldif
+        rm -rf /etc/ldap/slapd.d/*
+        slapadd -n0 -F /etc/ldap/slapd.d -l /tmp/config.ldif >/dev/null 2>&1
+    fi
 
     touch /etc/ldap/docker-configured
 fi

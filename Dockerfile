@@ -6,8 +6,9 @@ ENV OPENLDAP_VERSION 2.4.31
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        ldap-utils=${OPENLDAP_VERSION}* \
         slapd=${OPENLDAP_VERSION}* \
-        ldap-utils=${OPENLDAP_VERSION}* && \
+        vim && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

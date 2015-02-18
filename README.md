@@ -53,6 +53,14 @@ There is an optinal third variable
 
 that represents the human readable company name (e.g. `Example Inc.`).
 
+The fourth (somewhat) optional variable
+
+    SLAPD_CONFIG_PASSWORD
+
+allows password protected access to the `dn=config` branch. This helps to
+reconfigure the server without interruption (read the
+[official documentation](http://www.openldap.org/doc/admin24/guide.html#Configuring%20slapd)).
+
 After the first start of the image (and the initial configuration), these
 envirnonment variables are not evaluated anymore.
 
