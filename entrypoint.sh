@@ -1,9 +1,15 @@
 #!/bin/bash
 set -e
 
-chown -R openldap:openldap /var/lib/ldap/
+chown openldap:openldap /var/lib/ldap/
 
-if [[ ! -f /etc/ldap/docker-configured ]]; then
+if [[ -d /var/lib/ldap/config ]]; then
+
+    rm -rf /etc/ldap
+    ln -s /var/lib/ldap/config /etc/ldap
+
+else
+
     if [[ -z "$SLAPD_PASSWORD" ]]; then
         echo >&2 "Error: slapd not configured and SLAPD_PASSWORD not set"
         echo >&2 "Did you forget to add -e SLAPD_PASSWORD=... ?"
@@ -47,7 +53,9 @@ EOF
     if [[ -n  "$SLAPD_CONFIG_PASSWORD" ]]; then
         password_hash=`slappasswd -s "${SLAPD_CONFIG_PASSWORD}"`
 
-        sed_safe_password_hash=${password_hash/\//\\\/}
+        sed_safe_password_hash=${password_hash//\//\\\/}
+
+        echo $sed_safe_password_hash
 
         slapcat -n0 -F /etc/ldap/slapd.d -l /tmp/config.ldif
         sed -i "s/\(olcRootDN: cn=admin,cn=config\)/\1\nolcRootPW: ${sed_safe_password_hash}/g" /tmp/config.ldif
@@ -55,7 +63,8 @@ EOF
         slapadd -n0 -F /etc/ldap/slapd.d -l /tmp/config.ldif >/dev/null 2>&1
     fi
 
-    touch /etc/ldap/docker-configured
+    mv /etc/ldap /var/lib/ldap/config
+    ln -s /var/lib/ldap/config /etc/ldap
 fi
 
 exec "$@"

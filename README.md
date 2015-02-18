@@ -67,7 +67,8 @@ envirnonment variables are not evaluated anymore.
 Data persistence
 ----------------
 
-The image exposes the directory, where the data is written
-(`VOLUME ["/var/lib/ldap"`). Please make sure that
-these directories are saved (in a data-only container or alike) in order to make
-sure that everything is restored after a new restart of the application.
+The image exposes one directory (`VOLUME ["/var/lib/ldap"]`). It both holds the
+database and the configuration (which is symlinked in a pretty hacky way - see
+the `entrypoint.sh` file if interested). Please make sure that this directory is
+saved (in a data-only container or alike) in order to make sure that everything
+is restored after a new restart of the container.
