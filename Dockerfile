@@ -14,7 +14,7 @@ RUN apt-get update && \
 
 EXPOSE 389
 
-VOLUME ["/var/lib/ldap"]
+VOLUME ["/var/lib/ldap", "/etc/ldap"]
 
 COPY entrypoint.sh /entrypoint.sh
 

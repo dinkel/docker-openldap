@@ -22,8 +22,6 @@ if [[ ! -f /etc/ldap/docker-configured ]]; then
         slapd slapd/no_configuration boolean false
         slapd slapd/password1 password $SLAPD_PASSWORD
         slapd slapd/password2 password $SLAPD_PASSWORD
-        slapd slapd/internal/adminpw string $SLAPD_PASSWORD
-        slapd slapd/internal/generated_adminpw password $SLAPD_PASSWORD
         slapd shared/organization string $SLAPD_ORGANIZATION
         slapd slapd/domain string $SLAPD_DOMAIN
         slapd slapd/backend select hdb
@@ -49,8 +47,10 @@ EOF
     if [[ -n  "$SLAPD_CONFIG_PASSWORD" ]]; then
         password_hash=`slappasswd -s "${SLAPD_CONFIG_PASSWORD}"`
 
+        sed_safe_password_hash=${password_hash/\//\\\/}
+
         slapcat -n0 -F /etc/ldap/slapd.d -l /tmp/config.ldif
-        sed -i "s/\(olcRootDN: cn=admin,cn=config\)/\1\nolcRootPW: ${password_hash}/g" /tmp/config.ldif
+        sed -i "s/\(olcRootDN: cn=admin,cn=config\)/\1\nolcRootPW: ${sed_safe_password_hash}/g" /tmp/config.ldif
         rm -rf /etc/ldap/slapd.d/*
         slapadd -n0 -F /etc/ldap/slapd.d -l /tmp/config.ldif >/dev/null 2>&1
     fi
