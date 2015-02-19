@@ -61,6 +61,16 @@ allows password protected access to the `dn=config` branch. This helps to
 reconfigure the server without interruption (read the
 [official documentation](http://www.openldap.org/doc/admin24/guide.html#Configuring%20slapd)).
 
+One can load additional schemas provided in the `slapd` package that are not
+installed using the
+
+    SLAPD_ADDITIONAL_SCHEMAS
+
+environment variable with comma-separated enties. As of writing these
+instructions, there are the following additional schemas available:
+`collective`, `corba`, `duaconf`, `dyngroup`, `java`, `misc`, `openldap`, `pmi`
+and `ppolicy`.
+
 After the first start of the image (and the initial configuration), these
 envirnonment variables are not evaluated anymore.
 
