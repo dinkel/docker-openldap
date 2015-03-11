@@ -9,13 +9,13 @@ in the configuration.
 
 NOTE: On purpose, there is no secured channel (TLS/SSL), because I believe that
 this service should never be exposed to the internet, but only be used directly
-by Docker containers using the `--link` option.
+by other Docker containers using the `--link` option.
 
 Usage
 -----
 
 The most simple form would be to start the application like so (however this is
-not the recommended way - see above):
+not the recommended way - see below):
 
     docker run -d -p 389:389 -e SLAPD_PASSWORD=mysecretpassword -e SLAPD_DOMAIN=ldap.example.org dinkel/openldap
 
@@ -34,7 +34,7 @@ OpenLDAP daemon is listening to (the port is the default port `389`).
 Configuration (environment variables)
 -------------------------------------
 
-For the first run one has to set at least two envrironment variables. The first
+For the first run, one has to set at least two environment variables. The first
 
     SLAPD_PASSWORD
 
@@ -77,8 +77,8 @@ envirnonment variables are not evaluated anymore.
 Data persistence
 ----------------
 
-The image exposes one directory (`VOLUME ["/var/lib/ldap"]`). It both holds the
-database and the configuration (which is symlinked in a pretty hacky way - see
-the `entrypoint.sh` file if interested). Please make sure that this directory is
-saved (in a data-only container or alike) in order to make sure that everything
-is restored after a new restart of the container.
+The image exposes two directories (`VOLUME ["/etc/ldap", "/var/lib/ldap"]`).
+The first holds the "static" configurationm while the second holds the actual
+database. Please make sure that these two directories are saved (in a data-only
+container or alike) in order to make sure that everything is restored after a
+restart of the container.

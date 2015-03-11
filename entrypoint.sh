@@ -3,26 +3,23 @@ set -e
 
 chown openldap:openldap /var/lib/ldap/
 
-if [[ -d /var/lib/ldap/config ]]; then
-
-    rm -rf /etc/ldap
-    ln -s /var/lib/ldap/config /etc/ldap
-
-else
+if [[ ! -d /etc/ldap/slapd.d ]]; then
 
     if [[ -z "$SLAPD_PASSWORD" ]]; then
-        echo >&2 "Error: slapd not configured and SLAPD_PASSWORD not set"
+        echo -n >&2 "Error: Container not configured and SLAPD_PASSWORD not set. "
         echo >&2 "Did you forget to add -e SLAPD_PASSWORD=... ?"
         exit 1
     fi
 
     if [[ -z "$SLAPD_DOMAIN" ]]; then
-        echo >&2 "Error: slapd not configured and SLAPD_DOMAIN not set"
+        echo -n >&2 "Error: Container not configured and SLAPD_DOMAIN not set. "
         echo >&2 "Did you forget to add -e SLAPD_DOMAIN=... ?"
         exit 1
     fi
 
     SLAPD_ORGANIZATION="${SLAPD_ORGANIZATION:-${SLAPD_DOMAIN}}"
+
+    cp -a /etc/ldap.dist/* /etc/ldap
 
     cat <<-EOF | debconf-set-selections
         slapd slapd/no_configuration boolean false
@@ -68,9 +65,12 @@ EOF
             slapadd -n0 -F /etc/ldap/slapd.d -l "/etc/ldap/schema/${schema}.ldif" >/dev/null 2>&1
         done
     fi
+else
+    slapd_configs_in_env=`env | grep 'SLAPD_'`
 
-    mv /etc/ldap /var/lib/ldap/config
-    ln -s /var/lib/ldap/config /etc/ldap
+    if [ -n "${slapd_configs_in_env:+x}" ]; then
+        echo "Info: Container already configured, therefore ignoring SLAPD_xxx environment variables"
+    fi
 fi
 
 exec "$@"

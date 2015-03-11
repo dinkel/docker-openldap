@@ -12,9 +12,11 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+RUN mv /etc/ldap /etc/ldap.dist
+
 EXPOSE 389
 
-VOLUME ["/var/lib/ldap"]
+VOLUME ["/etc/ldap", "/var/lib/ldap"]
 
 COPY entrypoint.sh /entrypoint.sh
 
