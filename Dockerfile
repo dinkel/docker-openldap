@@ -18,6 +18,8 @@ EXPOSE 389
 
 VOLUME ["/etc/ldap", "/var/lib/ldap"]
 
+COPY modules/ /etc/ldap.dist/modules
+
 COPY entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

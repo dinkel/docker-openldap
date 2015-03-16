@@ -27,7 +27,7 @@ if [[ ! -d /etc/ldap/slapd.d ]]; then
         slapd slapd/password2 password $SLAPD_PASSWORD
         slapd shared/organization string $SLAPD_ORGANIZATION
         slapd slapd/domain string $SLAPD_DOMAIN
-        slapd slapd/backend select hdb
+        slapd slapd/backend select HDB
         slapd slapd/allow_ldap_v2 boolean false
         slapd slapd/purge_database boolean false
         slapd slapd/move_old_database boolean true
@@ -63,6 +63,14 @@ EOF
 
         for schema in "${schemas[@]}"; do
             slapadd -n0 -F /etc/ldap/slapd.d -l "/etc/ldap/schema/${schema}.ldif" >/dev/null 2>&1
+        done
+    fi
+
+    if [[ -n "$SLAPD_ADDITIONAL_MODULES" ]]; then
+        IFS=","; declare -a modules=($SLAPD_ADDITIONAL_MODULES)
+
+        for module in "${modules[@]}"; do
+             slapadd -n0 -F /etc/ldap/slapd.d -l "/etc/ldap/modules/${module}.ldif" >/dev/null 2>&1
         done
     fi
 else

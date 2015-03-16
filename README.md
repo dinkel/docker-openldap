@@ -71,6 +71,17 @@ instructions, there are the following additional schemas available:
 `collective`, `corba`, `duaconf`, `dyngroup`, `java`, `misc`, `openldap`, `pmi`
 and `ppolicy`.
 
+At least one quite common module is neither loaded nor configured by default (I
+am talking about the `memberof` overlay). In order to activate this (and
+possibly other modules in the future), there is another environment variable
+called
+
+    SLAPD_ADDITIONAL_MODULES
+
+which can hold comma-separated enties. It will try to run `.ldif` files with
+a corresponsing name from th `module` directory. Currently only `memberof` is
+avaliable.
+
 After the first start of the image (and the initial configuration), these
 envirnonment variables are not evaluated anymore.
 
