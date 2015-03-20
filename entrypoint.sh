@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-chown openldap:openldap /var/lib/ldap/
+chown -R openldap:openldap /var/lib/ldap/
 
 if [[ ! -d /etc/ldap/slapd.d ]]; then
 
