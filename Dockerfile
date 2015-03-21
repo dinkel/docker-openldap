@@ -24,4 +24,4 @@ COPY entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-CMD ["slapd", "-d", "32768"]
+CMD ["slapd", "-d", "32768", "-u", "openldap", "-g", "openldap"]
