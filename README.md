@@ -82,6 +82,13 @@ which can hold comma-separated enties. It will try to run `.ldif` files with
 a corresponsing name from th `module` directory. Currently only `memberof` is
 avaliable.
 
+The maximal number of open file can largely affect the RAM usage of the slapd
+process. You can use the environment variable
+
+    MAX_NOFILE
+
+to change the maximal number of open files. The default number is 8192.
+
 After the first start of the image (and the initial configuration), these
 envirnonment variables are not evaluated anymore.
 

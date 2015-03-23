@@ -24,4 +24,6 @@ COPY entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 
+ENV MAX_NOFILE 8192
+
 CMD ["slapd", "-d", "32768", "-u", "openldap", "-g", "openldap"]
