@@ -7,6 +7,8 @@ ulimit -n 8192
 
 set -e
 
+ulimit -n $MAX_NOFILE
+
 chown -R openldap:openldap /var/lib/ldap/
 
 if [[ ! -d /etc/ldap/slapd.d ]]; then
