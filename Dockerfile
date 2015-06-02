@@ -1,8 +1,8 @@
-FROM debian:wheezy
+FROM debian:jessie
 
 MAINTAINER Christian Luginbühl <dinke@pimprecords.com>
 
-ENV OPENLDAP_VERSION 2.4.31
+ENV OPENLDAP_VERSION 2.4.40
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \

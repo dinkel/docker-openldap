@@ -79,6 +79,8 @@ EOF
              slapadd -n0 -F /etc/ldap/slapd.d -l "/etc/ldap/modules/${module}.ldif" >/dev/null 2>&1
         done
     fi
+
+    chown -R openldap:openldap /etc/ldap/slapd.d/
 else
     slapd_configs_in_env=`env | grep 'SLAPD_'`
 
