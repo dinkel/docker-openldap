@@ -5,10 +5,9 @@ MAINTAINER Christian Luginbühl <dinke@pimprecords.com>
 ENV OPENLDAP_VERSION 2.4.40
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
         ldap-utils=${OPENLDAP_VERSION}* \
         slapd=${OPENLDAP_VERSION}* \
-        vim && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
