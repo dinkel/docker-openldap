@@ -1,7 +1,7 @@
 docker-openldap
 ===============
 
-A Docker image running OpenLDAP on Debian stable ("wheezy" at the moment). The
+A Docker image running OpenLDAP on Debian stable ("jessie" at the moment). The
 Dockerfile is inspired by
 [cnry/openldap](https://registry.hub.docker.com/u/cnry/openldap/), but as said
 before, running a stable Debian and be a little less verbose, but more complete
@@ -79,7 +79,7 @@ called
     SLAPD_ADDITIONAL_MODULES
 
 which can hold comma-separated enties. It will try to run `.ldif` files with
-a corresponsing name from th `module` directory. Currently only `memberof` is
+a corresponsing name from the `module` directory. Currently only `memberof` is
 avaliable.
 
 After the first start of the image (and the initial configuration), these
@@ -89,7 +89,7 @@ Data persistence
 ----------------
 
 The image exposes two directories (`VOLUME ["/etc/ldap", "/var/lib/ldap"]`).
-The first holds the "static" configurationm while the second holds the actual
+The first holds the "static" configuration while the second holds the actual
 database. Please make sure that these two directories are saved (in a data-only
 container or alike) in order to make sure that everything is restored after a
 restart of the container.
