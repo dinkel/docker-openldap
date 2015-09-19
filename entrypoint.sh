@@ -7,7 +7,7 @@ ulimit -n 8192
 
 set -e
 
-chown -R openldap:openldap /var/lib/ldap/
+chown -R openldap:openldap /var/lib/ldap/ /var/run/slapd/
 
 if [[ ! -d /etc/ldap/slapd.d ]]; then
 
