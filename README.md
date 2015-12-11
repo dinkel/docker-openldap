@@ -1,8 +1,7 @@
-docker-openldap
-===============
+# docker-openldap
+> A Docker image running OpenLDAP.
 
-A Docker image running OpenLDAP on Debian stable ("jessie" at the moment). The
-Dockerfile is inspired by
+The image is based on Debian stable ("jessie" at the moment).  The Dockerfile is inspired by
 [cnry/openldap](https://registry.hub.docker.com/u/cnry/openldap/), but as said
 before, running a stable Debian and be a little less verbose, but more complete
 in the configuration.
@@ -11,8 +10,7 @@ NOTE: On purpose, there is no secured channel (TLS/SSL), because I believe that
 this service should never be exposed to the internet, but only be used directly
 by other Docker containers using the `--link` option.
 
-Usage
------
+## Usage
 
 The most simple form would be to start the application like so (however this is
 not the recommended way - see below):
@@ -31,67 +29,87 @@ An application talking to OpenLDAP should then `--link` the container:
 The name after the colon in the `--link` section is the hostname where the
 OpenLDAP daemon is listening to (the port is the default port `389`).
 
-Configuration (environment variables)
--------------------------------------
+## Configuration (environment variables)
 
-For the first run, one has to set at least two environment variables. The first
+For the first run, one has to set at least two environment variables.  After the
+first start of the image (and the initial configuration), these
+envirnonment variables are not evaluated.
 
-    SLAPD_PASSWORD
-
-sets the password for the `admin` user.
-
-The second
-
-    SLAPD_DOMAIN
-
-sets the DC (Domain component) parts. E.g. if one sets it to `ldap.example.org`,
-the generated base DC parts would be `...,dc=ldap,dc=example,dc=org`.
-
-There is an optinal third variable
-
-    SLAPD_ORGANIZATION (defaults to $SLAPD_DOMAIN)
-
-that represents the human readable company name (e.g. `Example Inc.`).
-
-The fourth (somewhat) optional variable
-
-    SLAPD_CONFIG_PASSWORD
-
-allows password protected access to the `dn=config` branch. This helps to
-reconfigure the server without interruption (read the
+* `SLAPD_PASSWORD` (required) - sets the password for the `admin` user.
+* `SLAPD_DOMAIN` (required) - sets the DC (Domain component) parts. E.g. if one sets
+it to `ldap.example.org`, the generated base DC parts would be `...,dc=ldap,dc=example,dc=org`.
+* `SLAPD_ORGANIZATION` (defaults to $SLAPD_DOMAIN) - represents the human readable
+company name (e.g. `Example Inc.`).
+* `SLAPD_CONFIG_PASSWORD` - allows password protected access to the `dn=config`
+branch. This helps to reconfigure the server without interruption (read the
 [official documentation](http://www.openldap.org/doc/admin24/guide.html#Configuring%20slapd)).
+* `SLAPD_ADDITIONAL_SCHEMAS` - loads additional schemas provided in the `slapd`
+package that are not installed using the environment variable with comma-separated
+enties. As of writing these instructions, there are the following additional schemas
+available: `collective`, `corba`, `duaconf`, `dyngroup`, `java`, `misc`, `openldap`,
+`pmi` and `ppolicy`.
+* `SLAPD_ADDITIONAL_MODULES` - comma-separated list of modules to load. It will try
+to run `.ldif` files with a corresponsing name from the `module` directory.
+Currently only `memberof` and `ppolicy` are avaliable.
+* `SLAPD_FORCE_RECONFIGURE` - (defaults to false)  Used if one needs to reconfigure
+the `slapd` service after the image has been initialized.  Set this value to `true`
+to reconfigure he image.
+* `SLAPD_PPOLICY_DN_PREFIX` - (defaults to `cn=default,ou=policies`) sets the dn
+prefix used in `modules/ppolicy.ldif` for the `olcPPolicyDefault` attribute.  The
+value used for `olcPPolicyDefault` is derived from `$SLAPD_PPOLICY_DN_PREFIX,(dc
+component parts from $SLAPD_DOMAIN)`.  This variable is only useful when `ppolicy`
+is listed as a module with `SLAPD_ADDITIONAL_MODULES`.
 
-One can load additional schemas provided in the `slapd` package that are not
-installed using the
+### Setting up ppolicy
 
-    SLAPD_ADDITIONAL_SCHEMAS
+If you're running the image with the following variables:
 
-environment variable with comma-separated enties. As of writing these
-instructions, there are the following additional schemas available:
-`collective`, `corba`, `duaconf`, `dyngroup`, `java`, `misc`, `openldap`, `pmi`
-and `ppolicy`.
+```
+-e SLAPD_DOMAIN=mycompany.com -e SLAPD_ADDITIONAL_MODULES=ppolicy`
+```
 
-At least one quite common module is neither loaded nor configured by default (I
-am talking about the `memberof` overlay). In order to activate this (and
-possibly other modules in the future), there is another environment variable
-called
+You'll need to execute the following command:
 
-    SLAPD_ADDITIONAL_MODULES
+```
+ldapadd -h localhost -x -c -D 'cn=admin,dc=mycompany,dc=com' -w adminSecret -f mypolicy.ldif
+```
 
-which can hold comma-separated enties. It will try to run `.ldif` files with
-a corresponsing name from the `module` directory. Currently only `memberof` is
-avaliable.
+The contents of `mypolicy.ldif` should look something like this:
 
-After the first start of the image (and the initial configuration), these
-envirnonment variables are not evaluated anymore. If one needs to reconfigure
-the `slapd` service, it is possible to set
+```
+# Define password policy
+dn: ou=policies,dc=mycompany,dc=com
+objectClass: organizationalUnit
+ou: policies
 
-    SLAPD_FORCE_RECONFIGURE (defaults to false)
+dn: cn=default,ou=policies,dc=mycompany,dc=com
+objectClass: applicationProcess
+objectClass: pwdPolicy
+cn: default
+pwdAllowUserChange: TRUE
+pwdAttribute: userPassword
+pwdCheckQuality: 1
+# 7 days
+pwdExpireWarning: 604800
+pwdFailureCountInterval: 0
+pwdGraceAuthNLimit: 0
+pwdInHistory: 5
+pwdLockout: TRUE
+# 30 minutes
+pwdLockoutDuration: 1800
+# 180 days
+pwdMaxAge: 15552000
+pwdMaxFailure: 5
+pwdMinAge: 0
+pwdMinLength: 6
+pwdMustChange: TRUE
+pwdSafeModify: FALSE
+```
 
-to `true`.
+See the [docs](http://www.zytrax.com/books/ldap/ch6/ppolicy.html) for descriptions
+on the available attributes and what they mean.
 
-Data persistence
-----------------
+## Data persistence
 
 The image exposes two directories (`VOLUME ["/etc/ldap", "/var/lib/ldap"]`).
 The first holds the "static" configuration while the second holds the actual
