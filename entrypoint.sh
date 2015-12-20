@@ -9,7 +9,9 @@ set -e
 
 chown -R openldap:openldap /var/lib/ldap/ /var/run/slapd/
 
-if [[ ! -d /etc/ldap/slapd.d ]]; then
+SLAPD_FORCE_RECONFIGURE="${SLAPD_FORCE_RECONFIGURE:-false}"
+
+if [[ ! -d /etc/ldap/slapd.d || "$SLAPD_FORCE_RECONFIGURE" == "true" ]]; then
 
     if [[ -z "$SLAPD_PASSWORD" ]]; then
         echo -n >&2 "Error: Container not configured and SLAPD_PASSWORD not set. "

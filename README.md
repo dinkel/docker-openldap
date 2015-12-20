@@ -83,7 +83,12 @@ a corresponsing name from the `module` directory. Currently only `memberof` is
 avaliable.
 
 After the first start of the image (and the initial configuration), these
-envirnonment variables are not evaluated anymore.
+envirnonment variables are not evaluated anymore. If one needs to reconfigure
+the `slapd` service, it is possible to set
+
+    SLAPD_FORCE_RECONFIGURE (defaults to false)
+
+to `true`.
 
 Data persistence
 ----------------
