@@ -1,5 +1,5 @@
-# docker-openldap
-> A Docker image running OpenLDAP.
+docker-openldap
+===============
 
 The image is based on Debian stable ("jessie" at the moment).  The Dockerfile is inspired by
 [cnry/openldap](https://registry.hub.docker.com/u/cnry/openldap/), but as said
@@ -10,7 +10,8 @@ NOTE: On purpose, there is no secured channel (TLS/SSL), because I believe that
 this service should never be exposed to the internet, but only be used directly
 by other Docker containers using the `--link` option.
 
-## Usage
+Usage
+-----
 
 The most simple form would be to start the application like so (however this is
 not the recommended way - see below):
@@ -20,7 +21,7 @@ not the recommended way - see below):
 To get the full potential this image offers, one should first create a data-only
 container (see "Data persistence" below), start the OpenLDAP daemon as follows:
 
-    docker run -d -name openldap --volumes-from your-data-container dinkel/openldap
+    docker run -d --name openldap --volumes-from your-data-container dinkel/openldap
 
 An application talking to OpenLDAP should then `--link` the container:
 
@@ -29,11 +30,13 @@ An application talking to OpenLDAP should then `--link` the container:
 The name after the colon in the `--link` section is the hostname where the
 OpenLDAP daemon is listening to (the port is the default port `389`).
 
-## Configuration (environment variables)
+Configuration (environment variables)
+-------------------------------------
 
-For the first run, one has to set at least two environment variables.  After the
-first start of the image (and the initial configuration), these
-envirnonment variables are not evaluated.
+For the first run, one has to set at least the first two environment variables.
+After the first start of the image (and the initial configuration), these
+envirnonment variables are not evaluated again (see the
+`SLAPD_FORCE_RECONFIGURE` option).
 
 * `SLAPD_PASSWORD` (required) - sets the password for the `admin` user.
 * `SLAPD_DOMAIN` (required) - sets the DC (Domain component) parts. E.g. if one sets
@@ -51,38 +54,43 @@ available: `collective`, `corba`, `duaconf`, `dyngroup`, `java`, `misc`, `openld
 * `SLAPD_ADDITIONAL_MODULES` - comma-separated list of modules to load. It will try
 to run `.ldif` files with a corresponsing name from the `module` directory.
 Currently only `memberof` and `ppolicy` are avaliable.
+
 * `SLAPD_FORCE_RECONFIGURE` - (defaults to false)  Used if one needs to reconfigure
 the `slapd` service after the image has been initialized.  Set this value to `true`
 to reconfigure he image.
-* `SLAPD_PPOLICY_DN_PREFIX` - (defaults to `cn=default,ou=policies`) sets the dn
-prefix used in `modules/ppolicy.ldif` for the `olcPPolicyDefault` attribute.  The
-value used for `olcPPolicyDefault` is derived from `$SLAPD_PPOLICY_DN_PREFIX,(dc
-component parts from $SLAPD_DOMAIN)`.  This variable is only useful when `ppolicy`
-is listed as a module with `SLAPD_ADDITIONAL_MODULES`.
 
 ### Setting up ppolicy
 
-If you're running the image with the following variables:
+The ppolicy module provides enhanced password management capabilities that are
+applied to non-rootdn bind attempts in OpenLDAP. In order to it, one has to load
+both the schema `ppolicy` and the module `ppolicy`:
 
 ```
--e SLAPD_DOMAIN=mycompany.com -e SLAPD_ADDITIONAL_MODULES=ppolicy`
+-e SLAPD_DOMAIN=ldap.example.org -e SLAPD_ADDITIONAL_SCHEMAS=ppolicy -e SLAPD_ADDITIONAL_MODULES=ppolicy`
 ```
 
-You'll need to execute the following command:
+There is one additional environment variable available:
+
+* `SLAPD_PPOLICY_DN_PREFIX` - (defaults to `cn=default,ou=policies`) sets the dn
+prefix used in `modules/ppolicy.ldif` for the `olcPPolicyDefault` attribute.  The
+value used for `olcPPolicyDefault` is derived from `$SLAPD_PPOLICY_DN_PREFIX,(dc
+component parts from $SLAPD_DOMAIN)`.
+
+After loading the module, you have to load a default password policy, like so:
 
 ```
-ldapadd -h localhost -x -c -D 'cn=admin,dc=mycompany,dc=com' -w adminSecret -f mypolicy.ldif
+ldapadd -h localhost -x -c -D 'cn=admin,dc=ldap,dc=example,dc=org' -w [$SLAPD_PASSWORD] -f default-policy.ldif
 ```
 
-The contents of `mypolicy.ldif` should look something like this:
+The contents of `default-policy.ldif` should look something like this:
 
 ```
 # Define password policy
-dn: ou=policies,dc=mycompany,dc=com
+dn: ou=policies,dc=ldap,dc=example,dc=org
 objectClass: organizationalUnit
 ou: policies
 
-dn: cn=default,ou=policies,dc=mycompany,dc=com
+dn: cn=default,ou=policies,dc=ldap,dc=example,dc=org
 objectClass: applicationProcess
 objectClass: pwdPolicy
 cn: default
