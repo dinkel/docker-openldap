@@ -25,8 +25,8 @@ if [[ ! -d /etc/ldap/slapd.d || "$SLAPD_FORCE_RECONFIGURE" == "true" ]]; then
         exit 1
     fi
 
+    SLAPD_PPOLICY_DN_PREFIX="${SLAPD_PPOLICY_DN_PREFIX:-cn=default,ou=policies}"
     SLAPD_ORGANIZATION="${SLAPD_ORGANIZATION:-${SLAPD_DOMAIN}}"
-
     cp -a /etc/ldap.dist/* /etc/ldap
 
     cat <<-EOF | debconf-set-selections
@@ -78,7 +78,13 @@ EOF
         IFS=","; declare -a modules=($SLAPD_ADDITIONAL_MODULES)
 
         for module in "${modules[@]}"; do
-             slapadd -n0 -F /etc/ldap/slapd.d -l "/etc/ldap/modules/${module}.ldif" >/dev/null 2>&1
+             moduleFile="/etc/ldap/modules/${module}.ldif"
+
+             if [ "$module" == 'ppolicy' ]; then
+               sed -i'' "s|\(olcPPolicyDefault: \)PPOLICY_DN|\1${SLAPD_PPOLICY_DN_PREFIX}$dc_string|" $moduleFile
+             fi
+
+             slapadd -n0 -F /etc/ldap/slapd.d -l "$moduleFile" >/dev/null 2>&1
         done
     fi
 
