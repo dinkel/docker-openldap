@@ -57,7 +57,7 @@ Currently only `memberof` and `ppolicy` are avaliable.
 
 * `SLAPD_FORCE_RECONFIGURE` - (defaults to false)  Used if one needs to reconfigure
 the `slapd` service after the image has been initialized.  Set this value to `true`
-to reconfigure he image.
+to reconfigure the image.
 
 ### Setting up ppolicy
 
