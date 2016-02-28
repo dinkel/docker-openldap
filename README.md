@@ -76,7 +76,7 @@ prefix used in `modules/ppolicy.ldif` for the `olcPPolicyDefault` attribute.  Th
 value used for `olcPPolicyDefault` is derived from `$SLAPD_PPOLICY_DN_PREFIX,(dc
 component parts from $SLAPD_DOMAIN)`.
 
-After loading the module, you have to load a default password policy, like so:
+After loading the module, you have to load a default password policy, assuming you are on a host that has the client side tools installed (maybe you have to change the hostname as well):
 
 ```
 ldapadd -h localhost -x -c -D 'cn=admin,dc=ldap,dc=example,dc=org' -w [$SLAPD_PASSWORD] -f default-policy.ldif
