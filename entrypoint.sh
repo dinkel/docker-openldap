@@ -11,6 +11,12 @@ chown -R openldap:openldap /var/lib/ldap/ /var/run/slapd/
 
 SLAPD_FORCE_RECONFIGURE="${SLAPD_FORCE_RECONFIGURE:-false}"
 
+first_run=true
+
+if [[ -f "/var/lib/ldap/DB_CONFIG" ]]; then 
+    first_run=false
+fi
+
 if [[ ! -d /etc/ldap/slapd.d || "$SLAPD_FORCE_RECONFIGURE" == "true" ]]; then
 
     if [[ -z "$SLAPD_PASSWORD" ]]; then
@@ -26,6 +32,7 @@ if [[ ! -d /etc/ldap/slapd.d || "$SLAPD_FORCE_RECONFIGURE" == "true" ]]; then
     fi
 
     SLAPD_ORGANIZATION="${SLAPD_ORGANIZATION:-${SLAPD_DOMAIN}}"
+
     cp -a /etc/ldap.dist/* /etc/ldap
 
     cat <<-EOF | debconf-set-selections
@@ -44,7 +51,7 @@ EOF
 
     dc_string=""
 
-    IFS="."; declare -a dc_parts=($SLAPD_DOMAIN)
+    (IFS="."; declare -a dc_parts=($SLAPD_DOMAIN))
 
     for dc_part in "${dc_parts[@]}"; do
         dc_string="$dc_string,dc=$dc_part"
@@ -62,19 +69,20 @@ EOF
         slapcat -n0 -F /etc/ldap/slapd.d -l /tmp/config.ldif
         sed -i "s/\(olcRootDN: cn=admin,cn=config\)/\1\nolcRootPW: ${sed_safe_password_hash}/g" /tmp/config.ldif
         rm -rf /etc/ldap/slapd.d/*
-        slapadd -n0 -F /etc/ldap/slapd.d -l /tmp/config.ldif >/dev/null 2>&1
+        slapadd -n0 -F /etc/ldap/slapd.d -l /tmp/config.ldif
+        rm /tmp/config.ldif
     fi
 
     if [[ -n "$SLAPD_ADDITIONAL_SCHEMAS" ]]; then
-        IFS=","; declare -a schemas=($SLAPD_ADDITIONAL_SCHEMAS)
+        (IFS=","; declare -a schemas=($SLAPD_ADDITIONAL_SCHEMAS))
 
         for schema in "${schemas[@]}"; do
-            slapadd -n0 -F /etc/ldap/slapd.d -l "/etc/ldap/schema/${schema}.ldif" >/dev/null 2>&1
+            slapadd -n0 -F /etc/ldap/slapd.d -l "/etc/ldap/schema/${schema}.ldif"
         done
     fi
 
     if [[ -n "$SLAPD_ADDITIONAL_MODULES" ]]; then
-        IFS=","; declare -a modules=($SLAPD_ADDITIONAL_MODULES)
+        (IFS=","; declare -a modules=($SLAPD_ADDITIONAL_MODULES))
 
         for module in "${modules[@]}"; do
              module_file="/etc/ldap/modules/${module}.ldif"
@@ -85,7 +93,7 @@ EOF
                  sed -i "s/\(olcPPolicyDefault: \)PPOLICY_DN/\1${SLAPD_PPOLICY_DN_PREFIX}$dc_string/g" $module_file
              fi
 
-             slapadd -n0 -F /etc/ldap/slapd.d -l "$module_file" >/dev/null 2>&1
+             slapadd -n0 -F /etc/ldap/slapd.d -l "$module_file"
         done
     fi
 
@@ -94,7 +102,15 @@ else
     slapd_configs_in_env=`env | grep 'SLAPD_'`
 
     if [ -n "${slapd_configs_in_env:+x}" ]; then
-        echo "Info: Container already configured, therefore ignoring SLAPD_xxx environment variables"
+        echo "Info: Container already configured, therefore ignoring SLAPD_xxx environment variables and preseed files"
+    fi
+fi
+
+if [[ "$first_run" == "true" ]]; then
+    if [[ -d "/etc/ldap/prepopulate" ]]; then 
+        for file in `ls /etc/ldap/prepopulate/*.ldif`; do
+            slapadd -F /etc/ldap/slapd.d -l "$file"
+        done
     fi
 fi
 
