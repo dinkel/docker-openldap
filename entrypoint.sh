@@ -51,7 +51,7 @@ EOF
 
     dc_string=""
 
-    (IFS="."; declare -a dc_parts=($SLAPD_DOMAIN))
+    IFS="."; declare -a dc_parts=($SLAPD_DOMAIN); unset IFS
 
     for dc_part in "${dc_parts[@]}"; do
         dc_string="$dc_string,dc=$dc_part"
@@ -74,7 +74,7 @@ EOF
     fi
 
     if [[ -n "$SLAPD_ADDITIONAL_SCHEMAS" ]]; then
-        (IFS=","; declare -a schemas=($SLAPD_ADDITIONAL_SCHEMAS))
+        IFS=","; declare -a schemas=($SLAPD_ADDITIONAL_SCHEMAS); unset IFS
 
         for schema in "${schemas[@]}"; do
             slapadd -n0 -F /etc/ldap/slapd.d -l "/etc/ldap/schema/${schema}.ldif"
@@ -82,7 +82,7 @@ EOF
     fi
 
     if [[ -n "$SLAPD_ADDITIONAL_MODULES" ]]; then
-        (IFS=","; declare -a modules=($SLAPD_ADDITIONAL_MODULES))
+        IFS=","; declare -a modules=($SLAPD_ADDITIONAL_MODULES); unset IFS
 
         for module in "${modules[@]}"; do
              module_file="/etc/ldap/modules/${module}.ldif"
