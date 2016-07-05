@@ -31,7 +31,7 @@ if [[ ! -d /etc/ldap/slapd.d || "$SLAPD_FORCE_RECONFIGURE" == "true" ]]; then
 
     SLAPD_ORGANIZATION="${SLAPD_ORGANIZATION:-${SLAPD_DOMAIN}}"
 
-    cp -a /etc/ldap.dist/* /etc/ldap
+    cp -r /etc/ldap.dist/* /etc/ldap
 
     cat <<-EOF | debconf-set-selections
         slapd slapd/no_configuration boolean false
