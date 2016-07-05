@@ -7,8 +7,6 @@ ulimit -n 8192
 
 set -e
 
-chown -R openldap:openldap /var/lib/ldap/ /var/run/slapd/
-
 SLAPD_FORCE_RECONFIGURE="${SLAPD_FORCE_RECONFIGURE:-false}"
 
 first_run=true
@@ -113,5 +111,7 @@ if [[ "$first_run" == "true" ]]; then
         done
     fi
 fi
+
+chown -R openldap:openldap /var/lib/ldap/ /var/run/slapd/
 
 exec "$@"
