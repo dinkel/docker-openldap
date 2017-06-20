@@ -123,11 +123,13 @@ Prepopulate with data
 ---------------------
 
 There are some use cases where it is desired to prepopulate the database with 
-some data before launching the container. In order to do that, one can mount a 
+some data or configuration customizations before launching the container. In order to do that, one can mount a 
 host directory as a data volume in `/etc/ldap.dist/prepopulate`. Each LDIF file 
 is run through `slapadd` in alphabetical order. E.g.
 
     docker run -d --volume /path/to/dir/with/ldif-files:/etc/ldap.dist/prepopulate [CONFIG] dinkel/openldap
+
+One can also customize ACL rules of the database by providing `olcAccess` rules in the file named `access.rules` in `/etc/ldap.dist/prepopulate`. If the file does not exist, default rules are applied, otherwise they are replaced by the provided rules.
 
 Please note that the prepopulation files are only processed on the containers 
 first run (a.k.a. as long as there is no data in the database).

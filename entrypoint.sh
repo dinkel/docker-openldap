@@ -8,6 +8,8 @@ ulimit -n 8192
 set -e
 
 SLAPD_FORCE_RECONFIGURE="${SLAPD_FORCE_RECONFIGURE:-false}"
+ACCESS_LDIF="/etc/ldap/prepopulate/access.rules"
+CONFIG_LDIF="/etc/ldap/slapd.d/cn=config/olcDatabase={1}hdb.ldif"
 
 first_run=true
 
@@ -104,11 +106,19 @@ else
     fi
 fi
 
+
 if [[ "$first_run" == "true" ]]; then
     if [[ -d "/etc/ldap/prepopulate" ]]; then 
         for file in `ls /etc/ldap/prepopulate/*.ldif`; do
             slapadd -F /etc/ldap/slapd.d -l "$file"
         done
+
+        if [[ -f "${ACCESS_LDIF}" ]]; then
+             sed "9,12d" ${CONFIG_LDIF} > ${CONFIG_LDIF}.new
+             cat ${ACCESS_LDIF} >> ${CONFIG_LDIF}.new
+             cat ${CONFIG_LDIF}.new > ${CONFIG_LDIF}
+             echo "Access rules customized."
+        fi
     fi
 fi
 
