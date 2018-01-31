@@ -3,6 +3,7 @@ FROM debian:stretch
 MAINTAINER Christian Luginbühl <dinkel@pimprecords.com>
 
 ENV OPENLDAP_VERSION 2.4.44
+ENV DEBUG_LEVEL 32768
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
@@ -22,4 +23,4 @@ VOLUME ["/etc/ldap", "/var/lib/ldap"]
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-CMD ["slapd", "-d", "32768", "-u", "openldap", "-g", "openldap"]
+CMD ["sh", "-c", "slapd -d ${DEBUG_LEVEL} -u openldap -g openldap"]
