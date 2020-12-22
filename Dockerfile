@@ -1,6 +1,6 @@
 FROM debian:stretch
 
-MAINTAINER Christian Luginbühl <dinkel@pimprecords.com>
+LABEL maintainer='virgilio.padron.sop.j@gmail.com'
 
 ENV OPENLDAP_VERSION 2.4.44
 
@@ -22,4 +22,3 @@ VOLUME ["/etc/ldap", "/var/lib/ldap"]
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-CMD ["slapd", "-d", "32768", "-u", "openldap", "-g", "openldap"]

@@ -1,0 +1,40 @@
+name: 'Openldap'
+description: 'Provides an Opendalp service'
+
+inputs:
+  admin_password:
+    description: 'set the password for the admin user'
+    required: true
+    default: 'development'
+  
+  domain:
+    description: 'set domain name'
+    required: true
+  
+  config_password:
+    description: 'allows password protected access to the dn=config branch. This helps to reconfigure the server without interruption'
+    required: false
+    default: 'development'
+  
+  force_reconfigure:
+    description: 'Used if one needs to reconfigure the slapd service after the image has been initialized. Set this value to true to reconfigure the image'
+    required: false
+    default: 'false'
+  
+  additional_schemas:
+    description: 'loads additional schemas provided in the slapd package that are not installed'
+    required: false
+    default: 'openldap'
+  
+  additional_modules:
+    description: 'list of modules to load'
+    required: false
+    default: 'ppolicy'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+
+branding:
+  icon: box
+  color: black
