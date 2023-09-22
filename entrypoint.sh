@@ -55,10 +55,6 @@ EOF
         dc_string="$dc_string,dc=$dc_part"
     done
 
-    base_string="BASE ${dc_string:1}"
-
-    sed -i "s/^#BASE.*/${base_string}/g" /etc/ldap/ldap.conf
-
     if [[ -n "$SLAPD_CONFIG_PASSWORD" ]]; then
         password_hash=`slappasswd -s "${SLAPD_CONFIG_PASSWORD}"`
 
@@ -83,15 +79,16 @@ EOF
         IFS=","; declare -a modules=($SLAPD_ADDITIONAL_MODULES); unset IFS
 
         for module in "${modules[@]}"; do
-             module_file="/etc/ldap/modules/${module}.ldif"
+            for file in `ls /etc/ldap/modules/${module}*.ldif`; do
 
-             if [ "$module" == 'ppolicy' ]; then
-                 SLAPD_PPOLICY_DN_PREFIX="${SLAPD_PPOLICY_DN_PREFIX:-cn=default,ou=policies}"
+                if [ "$module" == "ppolicy" ]; then
+                    SLAPD_PPOLICY_DN_PREFIX="${SLAPD_PPOLICY_DN_PREFIX:-cn=default,ou=policies}"
 
-                 sed -i "s/\(olcPPolicyDefault: \)PPOLICY_DN/\1${SLAPD_PPOLICY_DN_PREFIX}$dc_string/g" $module_file
-             fi
+                    sed -i "s/\(olcPPolicyDefault: \)PPOLICY_DN/\1${SLAPD_PPOLICY_DN_PREFIX}$dc_string/g" $file
+                fi
 
-             slapadd -n0 -F /etc/ldap/slapd.d -l "$module_file"
+                slapmodify -n0 -F /etc/ldap/slapd.d -l "$file"
+            done
         done
     fi
 else

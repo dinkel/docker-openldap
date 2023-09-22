@@ -1,33 +1,10 @@
-dn: cn=module,cn=config
-cn: module
-objectClass: olcModuleList
-objectClass: top
-olcModulePath: /usr/lib/ldap
+dn: cn=module{0},cn=config
+changetype: modify
+add: olcModuleLoad
 olcModuleLoad: memberof.la
 
-dn: olcOverlay={0}memberof,olcDatabase={1}hdb,cn=config
-objectClass: olcConfig
-objectClass: olcMemberOf
-objectClass: olcOverlayConfig
-objectClass: top
-olcOverlay: memberof
-olcMemberOfDangling: ignore
-olcMemberOfRefInt: TRUE
-olcMemberOfGroupOC: groupOfNames
-olcMemberOfMemberAD: member
-olcMemberOfMemberOfAD: memberOf
-
-dn: cn=module,cn=config
-cn: module
-objectClass: olcModuleList
-objectClass: top
-olcModulePath: /usr/lib/ldap
+dn: cn=module{0},cn=config
+changetype: modify
+add: olcModuleLoad
 olcModuleLoad: refint.la
 
-dn: olcOverlay={1}refint,olcDatabase={1}hdb,cn=config
-objectClass: olcConfig
-objectClass: olcOverlayConfig
-objectClass: olcRefintConfig
-objectClass: top
-olcOverlay: {1}refint
-olcRefintAttribute: memberof member manager owner

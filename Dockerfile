@@ -1,12 +1,10 @@
-FROM debian:stretch
+FROM debian:bookworm
 
-MAINTAINER Christian Luginbühl <dinkel@pimprecords.com>
-
-ENV OPENLDAP_VERSION 2.4.44
+ENV OPENLDAP_VERSION 2.5.13
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-        slapd=${OPENLDAP_VERSION}* && \
+        slapd=${OPENLDAP_VERSION}*  && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
