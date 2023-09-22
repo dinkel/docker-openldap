@@ -1,7 +1,7 @@
 docker-openldap
 ===============
 
-The image is based on Debian stable ("stretch" at the moment). The Dockerfile is
+The image is based on Debian stable ("bookworm" at the moment). The Dockerfile is
 inspired by [cnry/openldap](https://registry.hub.docker.com/u/cnry/openldap/),
 but as said before, running a stable Debian and be a little less verbose, but
 more complete in the configuration.
