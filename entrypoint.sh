@@ -92,7 +92,9 @@ EOF
         done
     fi
 else
+    set +e
     slapd_configs_in_env=`env | grep 'SLAPD_'`
+    set -e
 
     if [ -n "${slapd_configs_in_env:+x}" ]; then
         echo "Info: Container already configured, therefore ignoring SLAPD_xxx environment variables and preseed files"
