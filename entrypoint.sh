@@ -11,7 +11,7 @@ SLAPD_FORCE_RECONFIGURE="${SLAPD_FORCE_RECONFIGURE:-false}"
 
 first_run=true
 
-if [[ -f "/var/lib/ldap/DB_CONFIG" ]]; then 
+if [[ -f "/prepopulated" ]]; then 
     first_run=false
 fi
 
@@ -105,6 +105,7 @@ if [[ "$first_run" == "true" ]]; then
             slapadd -F /etc/ldap/slapd.d -l "$file"
         done
     fi
+    touch /prepopulated
 fi
 
 chown -R openldap:openldap /etc/ldap/slapd.d/ /var/lib/ldap/ /var/run/slapd/
